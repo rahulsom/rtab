@@ -68,7 +68,7 @@ func parse(line string, seq int) *NetstatLine {
 		use:         use,
 		netif:       parts[5],
 		expire:      expire,
-		seq: seq,
+		seq:         seq,
 	}
 	return retval
 }
@@ -102,14 +102,35 @@ func main() {
 		gateways[route] = append(gateways[route], val)
 	}
 
+	lastGateway := "unknown"
+
 	for k, v := range gateways {
 		if !strings.Contains(k, ":") && !strings.Contains(k, "#") {
-			fmt.Println("Gateway:", k)
 			for _, v1 := range v {
-				fmt.Println("    -->", v1.Display())
+				if v1.destination != "default" {
+					if lastGateway != k {
+						fmt.Println("")
+						fmt.Println("Gateway:", k)
+						lastGateway = k
+					}
+					fmt.Println("    -->", v1.Display())
+				}
 			}
-			fmt.Println("")
 		}
+	}
 
+	for k, v := range gateways {
+		if !strings.Contains(k, ":") && !strings.Contains(k, "#") {
+			for _, v1 := range v {
+				if v1.destination == "default" {
+					if lastGateway != k {
+						fmt.Println("")
+						fmt.Println("Gateway:", k)
+						lastGateway = k
+					}
+					fmt.Println("    -->", v1.Display())
+				}
+			}
+		}
 	}
 }
