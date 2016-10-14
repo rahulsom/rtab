@@ -37,7 +37,7 @@ func (m *NetstatLine) Display() string {
 }
 
 func (m *NetstatLine) Route() string {
-	return fmt.Sprintf("%s (%s)", m.gateway, m.netif)
+	return fmt.Sprintf("%15s (%s)", m.gateway, m.netif)
 }
 
 func parse(line string, seq int) *NetstatLine {
@@ -88,6 +88,13 @@ func Lines(data string) []*NetstatLine {
 	return retval
 }
 
+func printGateway(gateway string) {
+	fmt.Println("                                 -->  ", gateway)
+	fmt.Println("--------------------------------------------------------------")
+	fmt.Println("")
+	fmt.Println("")
+
+}
 func main() {
 	netstat := GetNetstatOutput()
 	lines := Lines(netstat)
@@ -102,34 +109,35 @@ func main() {
 		gateways[route] = append(gateways[route], val)
 	}
 
-	lastGateway := "unknown"
+	fmt.Println("")
+	fmt.Println("")
 
 	for k, v := range gateways {
 		if !strings.Contains(k, ":") && !strings.Contains(k, "#") {
+			didPrint := 0
 			for _, v1 := range v {
 				if v1.destination != "default" {
-					if lastGateway != k {
-						fmt.Println("")
-						fmt.Println("Gateway:", k)
-						lastGateway = k
-					}
-					fmt.Println("    -->", v1.Display())
+					fmt.Println("", v1.Display())
+					didPrint = didPrint + 1
 				}
+			}
+			if didPrint > 0 {
+				printGateway(k)
 			}
 		}
 	}
 
 	for k, v := range gateways {
 		if !strings.Contains(k, ":") && !strings.Contains(k, "#") {
+			didPrint := 0
 			for _, v1 := range v {
 				if v1.destination == "default" {
-					if lastGateway != k {
-						fmt.Println("")
-						fmt.Println("Gateway:", k)
-						lastGateway = k
-					}
-					fmt.Println("    -->", v1.Display())
+					fmt.Println("", v1.Display())
+					didPrint = didPrint + 1
 				}
+			}
+			if didPrint > 0 {
+				printGateway(k)
 			}
 		}
 	}
